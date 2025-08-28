@@ -1,0 +1,38 @@
+TECNOLOGÍAS UTILIZADAS EN EL PROYECTO
+
+A continuación se detallan las librerías y conceptos clave de Python que se emplearon para el desarrollo de esta aplicación.
+
+--- LENGUAJE Y LIBRERÍAS DE INTERFAZ ---
+
+* Python:
+  - Es el lenguaje de programación sobre el cual se construyó toda la aplicación. Se utilizó para toda la lógica, desde la generación de números hasta la interacción con el usuario.
+
+* Tkinter (a través de ttkbootstrap):
+  - Es la biblioteca estándar de Python para crear interfaces gráficas de usuario (GUI). Proporciona la base para la ventana, los botones y todos los elementos visuales.
+
+* ttkbootstrap:
+  - Una librería externa que moderniza la apariencia de Tkinter. Fue fundamental para darle a la aplicación un aspecto visual profesional, aplicando temas, fuentes e iconos modernos sin necesidad de archivos externos.
+
+
+--- LIBRERÍAS DE ANÁLISIS Y VISUALIZACIÓN DE DATOS ---
+
+* NumPy:
+  - Es la librería esencial para la computación científica en Python. Se utilizó para:
+    1. Generar los números aleatorios de manera eficiente.
+    2. Realizar cálculos matemáticos sobre grandes volúmenes de datos.
+    3. Guardar la serie completa de números en formato CSV de forma muy rápida.
+
+* Pandas:
+  - Una potente librería para la manipulación y el análisis de datos. Su principal uso en el proyecto fue para organizar y mostrar la tabla de frecuencias de una manera limpia y estructurada.
+
+* Matplotlib:
+  - Es la librería de visualización de datos más popular de Python. Se empleó para generar y mostrar el histograma de frecuencias, la principal herramienta de análisis visual del programa.
+
+
+--- CONCEPTOS AVANZADOS DE PROGRAMACIÓN ---
+
+* Threading (Multihilo):
+  - Este módulo de Python fue crucial para el rendimiento de la aplicación. Permitió ejecutar el proceso de generación y cálculo (que puede ser muy lento con 1.000.000 de muestras) en un hilo secundario. Esto evita que la interfaz gráfica se congele y se mantenga siempre responsiva.
+
+* Queue (Cola):
+  - Se usó como un "buzón" seguro para comunicar el hilo de cálculo con el hilo de la interfaz. El hilo secundario deposita los resultados en la cola, y el hilo principal los recoge de forma segura para mostrarlos al usuario, evitando conflictos y errores.
