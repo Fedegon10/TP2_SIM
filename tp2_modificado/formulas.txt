@@ -1,0 +1,48 @@
+FÓRMULAS MATEMÁTICAS PARA LA GENERACIÓN DE DISTRIBUCIONES
+
+En todas las fórmulas, 'R' representa un número aleatorio generado a partir de una distribución uniforme continua en el intervalo [0, 1).
+
+---
+### Distribución Uniforme [a, b]
+
+Para transformar un número aleatorio 'R' (en el rango [0, 1)) a un número 'X' que siga una distribución uniforme en el intervalo [a, b), se utiliza la siguiente fórmula de transformación lineal:
+
+X = a + (b - a) * R
+
+Donde:
+- 'a' es el límite inferior del intervalo.
+- 'b' es el límite superior del intervalo.
+
+---
+### Distribución Exponencial
+
+Para generar un número 'X' que siga una distribución exponencial con una media (μ) dada, se utiliza el método de la transformada inversa. La fórmula es:
+
+X = -μ * ln(1 - R)
+
+Donde:
+- 'μ' (mu) es la media de la distribución.
+- 'ln' es el logaritmo natural.
+
+Nota: A veces, esta distribución se define por su tasa lambda (λ), donde μ = 1/λ.
+
+---
+### Distribución Normal
+
+Para generar un número 'X' que siga una distribución normal, el proyecto de Java implementa el método de Box-Muller, que genera dos variables normales estándar (Z₀ y Z₁) a partir de dos números aleatorios uniformes (R₁ y R₂).
+
+Las fórmulas para las variables estándar son:
+
+Z₀ = sqrt(-2 * ln(1 - R₁)) * cos(2 * π * R₂)
+Z₁ = sqrt(-2 * ln(1 - R₁)) * sin(2 * π * R₂)
+
+Luego, para ajustar estas variables a una distribución normal con una media (μ) y desviación estándar (σ) específicas, se aplica la siguiente transformación:
+
+X = Z * σ + μ
+
+Donde:
+- 'μ' (mu) es la media deseada.
+- 'σ' (sigma) es la desviación estándar deseada.
+- 'Z' es una de las variables estándar generadas (Z₀ o Z₁).
+
+El proyecto de Python utiliza una función optimizada de la librería NumPy 
