@@ -1,0 +1,70 @@
+TECNOLOGÍAS UTILIZADAS EN EL PROYECTO
+
+A continuación se detallan las librerías y conceptos clave de Python que se emplearon para el desarrollo de esta aplicación.
+
+--- LENGUAJE Y LIBRERÍAS DE INTERFAZ ---
+
+* Python:
+  - Es el lenguaje de programación sobre el cual se construyó toda la aplicación. Se utilizó para toda la lógica, desde la generación de números hasta la interacción con el usuario.
+
+* Tkinter (a través de ttkbootstrap):
+  - Es la biblioteca estándar de Python para crear interfaces gráficas de usuario (GUI). Proporciona la base para la ventana, los botones y todos los elementos visuales.
+
+* ttkbootstrap:
+  - Una librería externa que moderniza la apariencia de Tkinter. Fue fundamental para darle a la aplicación un aspecto visual profesional, aplicando temas, fuentes e iconos modernos sin necesidad de archivos externos.
+
+
+--- LIBRERÍAS DE ANÁLISIS Y VISUALIZACIÓN DE DATOS ---
+
+* NumPy:
+  - Es la librería esencial para la computación científica en Python. Se utilizó para:
+    1. Generar los números aleatorios de manera eficiente.
+    2. Realizar cálculos matemáticos sobre grandes volúmenes de datos.
+    3. Guardar la serie completa de números en formato CSV de forma muy rápida.
+
+* Pandas:
+  - Una potente librería para la manipulación y el análisis de datos. Su principal uso en el proyecto fue para organizar y mostrar la tabla de frecuencias de una manera limpia y estructurada.
+
+* Matplotlib:
+  - Es la librería de visualización de datos más popular de Python. Se empleó para generar y mostrar el histograma de frecuencias, la principal herramienta de análisis visual del programa.
+
+
+--- CONCEPTOS  DE PROGRAMACIÓN ---
+
+* Threading (Multihilo):
+  - Este módulo de Python fue crucial para el rendimiento de la aplicación. Permitió ejecutar el proceso de generación y cálculo (que puede ser muy lento con 1.000.000 de muestras) en un hilo secundario. Esto evita que la interfaz gráfica se congele y se mantenga siempre responsiva.
+
+* Queue (Cola):
+  - Se usó como un "buzón" seguro para comunicar el hilo de cálculo con el hilo de la interfaz. El hilo secundario deposita los resultados en la cola, y el hilo principal los recoge de forma segura para mostrarlos al usuario, evitando conflictos y errores.
+
+
+  -- FLUJO DE EJECUCIÓN DEL PROGRAMA --
+
+
+1. Inicio y Configuración del Usuario
+   - El usuario ejecuta main_gui.py, que inicia la aplicación y muestra la interfaz gráfica construida con ttkbootstrap.
+   - El usuario selecciona una distribución, ingresa el tamaño de la muestra, la cantidad de intervalos y los parámetros específicos de la distribución elegida.
+
+2. Disparo del Evento Principal
+   - Al hacer clic en el botón "▶ Generar y Analizar", se llama a la función iniciar_generacion.
+   - La interfaz se bloquea parcialmente (deshabilita botones) y muestra el estado "Procesando..." para dar feedback visual.
+   - Punto Clave: La aplicación lanza un hilo de ejecución secundario (threading) para realizar todo el trabajo pesado. Esto es crucial para que la ventana no se congele.
+
+3. Procesamiento en Segundo Plano
+   - El hilo secundario ejecuta la función proceso_largo, que se encarga de:
+     a. Llamar a la función correspondiente del paquete `distribuciones` (ej. generar_uniforme), la cual usa NumPy para crear el array de números aleatorios.
+     b. Pasar este array a la función calcular_frecuencias del módulo `procesador_datos`, que usa Pandas y NumPy para crear la tabla de frecuencias.
+     c. Empaquetar todos los resultados (la tabla, los números, los límites del histograma) en un objeto.
+
+4. Comunicación y Visualización de Resultados
+   - El hilo secundario deposita el paquete de resultados en una cola (queue), que actúa como un buzón seguro entre los hilos.
+   - Mientras tanto, la interfaz principal revisa esta cola cada 100 milisegundos (verificar_cola).
+   - Cuando detecta que hay un resultado en la cola, lo recoge y:
+     a. Actualiza la interfaz principal mostrando la muestra de números y la tabla de frecuencias.
+     b. Llama a la función graficar_histograma del módulo `visualizador`, que usa Matplotlib para crear y mostrar el gráfico del histograma.
+     c. Reactiva los botones y actualiza el estado a "¡Proceso completado!".
+
+5. Acciones Finales del Usuario
+   - Con los resultados en pantalla, el usuario puede:
+     * Exportar a CSV: Guardar la serie completa de números generados.
+     * Realizar Otra Prueba: Limpiar la interfaz para comenzar una nueva simulación.
