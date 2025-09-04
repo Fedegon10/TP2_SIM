@@ -1,0 +1,39 @@
+DESCRIPCIÓN DE ARCHIVOS DEL PROYECTO
+
+
+--- MÓDULOS DE LÓGICA ---
+
+* distribuciones/
+  - Es un paquete que contiene la lógica para generar los números aleatorios. Cada archivo adentro es responsable de una distribución específica.
+    * __init__.py: Permite que Python trate la carpeta "distribuciones" como un solo módulo, facilitando las importaciones.
+    * uniforme.py: Contiene la función para generar números con distribución uniforme.
+    * exponencial.py: Contiene la función para generar números con distribución exponencial.
+    * normal.py: Contiene la función para generar números con distribución normal.
+
+* procesador_datos.py
+  - Responsabilidad: Tomar la serie de números aleatorios ya generada y calcular la tabla de frecuencias.
+  - Tarea Principal: Agrupa los números en intervalos y cuenta cuántos caen en cada uno para construir la tabla que se muestra en la interfaz.
+
+* visualizador.py
+  - Responsabilidad: Generar la visualización gráfica de los datos.
+  - Tarea Principal: Toma los números generados y los límites de los intervalos para crear y mostrar el histograma de frecuencias usando la librería Matplotlib.
+
+
+--- ARCHIVO PRINCIPAL ---
+
+* main_gui.py
+  - Responsabilidad: Es el corazón de la aplicación.
+  - Tareas Principales:
+    1. Construir y mostrar toda la interfaz gráfica con la que el usuario interactúa.
+    2. Manejar los eventos del usuario (clics en botones, selección en menús, etc.).
+    3. Coordinar a los otros módulos: llama a las funciones de 'distribuciones' para generar los números, a 'procesador_datos' para la tabla y a 'visualizador' para el gráfico.
+    4. Gestionar el trabajo en segundo plano (threading) para que la aplicación no se congele.
+
+
+--- ARCHIVOS DE CONFIGURACIÓN Y DOCUMENTACIÓN ---
+
+* requirements.txt
+  - Contiene la lista de todas las librerías de Python que el proyecto necesita para funcionar (numpy, pandas, matplotlib, etc.). Sirve para instalar las dependencias fácilmente.
+
+* tecnologias_usadas.txt
+  - Es un archivo de documentación que explica en detalle las tecnologías, librerías y el flujo de ejecución del programa.
