@@ -44,7 +44,6 @@ class App(b.Window):
             values=["Uniforme", "Exponencial", "Normal"], state="readonly"
         )
         self.dist_combo.pack(fill=tk.X, expand=True)
-        # Vincula la selección del combobox a la función que actualiza los parámetros.
         self.dist_combo.bind("<<ComboboxSelected>>", self.actualizar_parametros)
 
         self.params_frame = b.LabelFrame(config_frame, text="Parámetros", padding="10")
@@ -60,28 +59,28 @@ class App(b.Window):
         self.entry_n.grid(row=0, column=1, sticky=tk.EW, pady=5, padx=(10,0))
         
         b.Label(muestra_frame, text="Intervalos:").grid(row=1, column=0, sticky=tk.W, pady=5)
-        self.combo_intervalos = b.Combobox(muestra_frame, values=[5, 10, 15, 20, 25], state="readonly")
-        self.combo_intervalos.grid(row=1, column=1, sticky=tk.EW, pady=5, padx=(10,0))
-        self.combo_intervalos.set(10)
+        
+        # --- CAMBIO 1: Reemplazar Combobox por Entry ---
+        self.entry_intervalos = b.Entry(muestra_frame)
+        self.entry_intervalos.grid(row=1, column=1, sticky=tk.EW, pady=5, padx=(10,0))
+        self.entry_intervalos.insert(0, "10") # Valor por defecto
+        # --- FIN DEL CAMBIO 1 ---
 
         action_buttons_frame = b.Frame(config_frame)
         action_buttons_frame.pack(fill=tk.X, pady=(25, 10))
 
-        # Botón para iniciar la simulación.
         self.generate_button = b.Button(
             action_buttons_frame, text="▶  Generar y Analizar", command=self.iniciar_generacion, 
             bootstyle="primary"
         )
         self.generate_button.pack(fill=tk.X, ipady=5, pady=(0, 5))
 
-        # Botón para exportar los datos a un archivo CSV.
         self.export_button = b.Button(
             action_buttons_frame, text="💾  Exportar a CSV", command=self.exportar_a_csv, 
             bootstyle="secondary", state="disabled"
         )
         self.export_button.pack(fill=tk.X, ipady=5, pady=(0, 5))
         
-        # Botón para limpiar la interfaz y empezar de nuevo.
         self.reset_button = b.Button(
             action_buttons_frame, text="🔄  Realizar Otra Prueba", command=self.resetear_interfaz,
             bootstyle="info-outline", state="disabled"
@@ -91,14 +90,12 @@ class App(b.Window):
         self.status_label = b.Label(config_frame, text="", anchor="center")
         self.status_label.pack(fill=tk.X, pady=10)
 
-        # Panel derecho para visualizar los resultados.
         results_frame = b.LabelFrame(main_frame, text="Resultados", padding="15")
         results_frame.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
         
         notebook = b.Notebook(results_frame)
         notebook.pack(fill=tk.BOTH, expand=True, pady=5)
         
-        # Cola para comunicar el hilo de cálculo con el de la interfaz.
         self.resultado_queue = queue.Queue()
         
         tab1 = b.Frame(notebook)
@@ -134,7 +131,11 @@ class App(b.Window):
         
         self.dist_combo.set("Uniforme")
         self.actualizar_parametros()
-        self.combo_intervalos.set(10)
+        
+        # --- CAMBIO 3: Resetear el Entry de intervalos ---
+        self.entry_intervalos.delete(0, tk.END)
+        self.entry_intervalos.insert(0, "10")
+        # --- FIN DEL CAMBIO 3 ---
         
         self.text_serie.delete('1.0', tk.END)
         for item in self.tree_tabla.get_children():
@@ -253,7 +254,13 @@ class App(b.Window):
         if not (0 < params['n'] <= 1000000):
             raise ValueError("El tamaño de la muestra debe estar entre 1 y 1,000,000.")
         
-        params['num_intervalos'] = int(self.combo_intervalos.get())
+        # --- CAMBIO 2: Validar el Entry de intervalos ---
+        num_intervalos = int(self.entry_intervalos.get())
+        if not (2 <= num_intervalos <= 100):
+            raise ValueError("El número de intervalos debe estar entre 2 y 100.")
+        params['num_intervalos'] = num_intervalos
+        # --- FIN DEL CAMBIO 2 ---
+        
         params['dist'] = self.distribucion_seleccionada.get()
 
         if params['dist'] == "Uniforme":
