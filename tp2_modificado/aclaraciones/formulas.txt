@@ -45,4 +45,14 @@ Donde:
 - 'σ' (sigma) es la desviación estándar deseada.
 - 'Z' es una de las variables estándar generadas (Z₀ o Z₁).
 
-El proyecto de Python utiliza una función optimizada de la librería NumPy 
+El proyecto de Python utiliza una función optimizada de la librería NumPy que, aunque internamente usa algoritmos más avanzados, produce resultados consistentes con estas mismas fórmulas.
+
+---
+### Distribución de Poisson
+
+La distribución de Poisson describe el número de eventos que ocurren en un intervalo fijo, dado un promedio de ocurrencia (λ). A diferencia de las otras, no existe una fórmula de transformada inversa simple.
+
+El proyecto de Python utiliza la función `np.random.poisson` de NumPy, que implementa algoritmos eficientes basados en la relación entre la distribución de Poisson y otras distribuciones, como la exponencial. Un método común es el algoritmo de Knuth, que simula los tiempos de llegada de eventos (que siguen una distribución exponencial) y cuenta cuántos ocurren antes de un tiempo determinado.
+
+La generación se basa en el parámetro:
+- 'λ' (lambda): La tasa media de ocurrencia o el número esperado de eventos en un intervalo.

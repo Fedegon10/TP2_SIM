@@ -8,7 +8,7 @@ import ttkbootstrap as b
 from ttkbootstrap.scrolled import ScrolledText
 
 # --- Módulos propios del proyecto ---
-from distribuciones import generar_uniforme, generar_exponencial, generar_normal
+from distribuciones import generar_uniforme, generar_exponencial, generar_normal, generar_poisson # <-- CAMBIO AQUÍ
 import procesador_datos as proc
 import visualizador as vis
 
@@ -30,7 +30,6 @@ class App(b.Window):
         main_frame = b.Frame(self, padding="15 20")
         main_frame.pack(fill=tk.BOTH, expand=True)
 
-        # Panel izquierdo para la configuración de la simulación.
         config_frame = b.Frame(main_frame)
         config_frame.pack(side=tk.LEFT, fill=tk.Y, padx=(0, 20))
         
@@ -41,10 +40,9 @@ class App(b.Window):
         self.distribucion_seleccionada = tk.StringVar(value="Uniforme")
         self.dist_combo = b.Combobox(
             dist_frame, textvariable=self.distribucion_seleccionada, 
-            values=["Uniforme", "Exponencial", "Normal"], state="readonly"
+            values=["Uniforme", "Exponencial", "Normal", "Poisson"], state="readonly" # <-- CAMBIO AQUÍ
         )
         self.dist_combo.pack(fill=tk.X, expand=True)
-        # Vincula la selección del combobox a la función que actualiza los parámetros.
         self.dist_combo.bind("<<ComboboxSelected>>", self.actualizar_parametros)
 
         self.params_frame = b.LabelFrame(config_frame, text="Parámetros", padding="10")
@@ -67,21 +65,18 @@ class App(b.Window):
         action_buttons_frame = b.Frame(config_frame)
         action_buttons_frame.pack(fill=tk.X, pady=(25, 10))
 
-        # Botón para iniciar la simulación.
         self.generate_button = b.Button(
             action_buttons_frame, text="▶  Generar y Analizar", command=self.iniciar_generacion, 
             bootstyle="primary"
         )
         self.generate_button.pack(fill=tk.X, ipady=5, pady=(0, 5))
 
-        # Botón para exportar los datos a un archivo CSV.
         self.export_button = b.Button(
             action_buttons_frame, text="💾  Exportar a CSV", command=self.exportar_a_csv, 
             bootstyle="secondary", state="disabled"
         )
         self.export_button.pack(fill=tk.X, ipady=5, pady=(0, 5))
         
-        # Botón para limpiar la interfaz y empezar de nuevo.
         self.reset_button = b.Button(
             action_buttons_frame, text="🔄  Realizar Otra Prueba", command=self.resetear_interfaz,
             bootstyle="info-outline", state="disabled"
@@ -91,14 +86,12 @@ class App(b.Window):
         self.status_label = b.Label(config_frame, text="", anchor="center")
         self.status_label.pack(fill=tk.X, pady=10)
 
-        # Panel derecho para visualizar los resultados.
         results_frame = b.LabelFrame(main_frame, text="Resultados", padding="15")
         results_frame.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
         
         notebook = b.Notebook(results_frame)
         notebook.pack(fill=tk.BOTH, expand=True, pady=5)
         
-        # Cola para comunicar el hilo de cálculo con el de la interfaz.
         self.resultado_queue = queue.Queue()
         
         tab1 = b.Frame(notebook)
@@ -173,10 +166,8 @@ class App(b.Window):
     def verificar_cola(self):
         # Revisa periódicamente si el hilo de cálculo ya terminó y dejó resultados.
         try:
-            # Intenta obtener un resultado de la cola de comunicación.
             resultado = self.resultado_queue.get_nowait()
             
-            # Si hay resultados, actualiza la interfaz y habilita los botones.
             if resultado.get("error"):
                 messagebox.showerror("Error en el Cálculo", str(resultado["error"]))
             else:
@@ -189,9 +180,8 @@ class App(b.Window):
             self.status_label.config(text="¡Proceso completado!")
 
         except queue.Empty:
-            pass # Si la cola está vacía, no hace nada.
+            pass 
         
-        # Vuelve a ejecutar esta función cada 100ms para seguir revisando.
         self.after(100, self.verificar_cola)
 
     def exportar_a_csv(self):
@@ -245,6 +235,11 @@ class App(b.Window):
             b.Label(self.params_frame, text="Desviación (σ):").grid(row=1, column=0, sticky=tk.W, pady=2)
             self.entries_params['desviacion'] = b.Entry(self.params_frame)
             self.entries_params['desviacion'].grid(row=1, column=1, pady=2, padx=(10,0))
+            
+        elif dist == "Poisson": # <-- CAMBIO AQUÍ
+            b.Label(self.params_frame, text="Lambda (λ):").grid(row=0, column=0, sticky=tk.W, pady=2)
+            self.entries_params['lambda'] = b.Entry(self.params_frame)
+            self.entries_params['lambda'].grid(row=0, column=1, pady=2, padx=(10,0))
     
     def validar_entradas(self):
         # Lee y comprueba que todos los datos ingresados por el usuario sean válidos.
@@ -265,13 +260,14 @@ class App(b.Window):
         elif params['dist'] == "Normal":
             params['media_norm'] = float(self.entries_params['media_norm'].get())
             params['desviacion'] = float(self.entries_params['desviacion'].get())
-        
+        elif params['dist'] == "Poisson": # <-- CAMBIO AQUÍ
+            params['lambda'] = float(self.entries_params['lambda'].get())
+
         return params
 
     def proceso_largo(self, params):
         # Esta función se ejecuta en el hilo secundario.
         try:
-            # 1. Llama a las funciones de generación y procesamiento de datos.
             numeros = None
             if params['dist'] == "Uniforme":
                 numeros = generar_uniforme(params['n'], params['a'], params['b'])
@@ -279,11 +275,12 @@ class App(b.Window):
                 numeros = generar_exponencial(params['n'], params['media_exp'])
             elif params['dist'] == "Normal":
                 numeros = generar_normal(params['n'], params['media_norm'], params['desviacion'])
+            elif params['dist'] == "Poisson": # <-- CAMBIO AQUÍ
+                numeros = generar_poisson(params['n'], params['lambda'])
             
             self.numeros_generados = numeros
             tabla_frec, limites = proc.calcular_frecuencias(numeros, params['num_intervalos'])
             
-            # 2. Prepara el paquete de resultados.
             resultado = {
                 "tabla": tabla_frec, 
                 "limites": limites, "dist": params['dist'], "error": None
@@ -292,7 +289,6 @@ class App(b.Window):
             resultado = {"error": e}
             self.numeros_generados = None
             
-        # 3. Coloca los resultados en la cola para que la interfaz los reciba.
         self.resultado_queue.put(resultado)
 
     def mostrar_resultados(self, tabla):
